@@ -26,11 +26,12 @@ interface EmployeeDto {
 
 interface UserManagementProps {
   accessToken: string;
+  readOnly?: boolean;
 }
 
 const USER_PAGE_SIZE = 10;
 
-export default function UserManagement({ accessToken }: UserManagementProps) {
+export default function UserManagement({ accessToken, readOnly = false }: UserManagementProps) {
   const [users, setUsers] = useState<UserDto[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
   const [employees, setEmployees] = useState<EmployeeDto[]>([]);
@@ -374,7 +375,8 @@ export default function UserManagement({ accessToken }: UserManagementProps) {
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="shrink-0 flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg transition-all active:scale-95"
+            disabled={readOnly}
+            className="shrink-0 flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Enroll User
@@ -463,28 +465,35 @@ export default function UserManagement({ accessToken }: UserManagementProps) {
                           className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-150"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <button
-                            onClick={() => openEditModal(user)}
-                            className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                          >
-                            <Edit className="h-4 w-4 mr-3 text-slate-400" />
-                            Edit User
-                          </button>
-                          <button
-                            onClick={() => { handleToggleActive(user); setOpenMenuId(null); }}
-                            className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                          >
-                            <Power className={`h-4 w-4 mr-3 ${user.isActive ? 'text-amber-500' : 'text-emerald-500'}`} />
-                            {user.isActive ? 'Deactivate' : 'Activate'}
-                          </button>
-                          <div className="border-t border-slate-100 my-1"></div>
-                          <button
-                            onClick={() => openDeleteModal(user)}
-                            className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            <Trash2 className="h-4 w-4 mr-3" />
-                            Delete User
-                          </button>
+                          {!readOnly && (
+                            <>
+                              <button
+                                onClick={() => openEditModal(user)}
+                                className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                              >
+                                <Edit className="h-4 w-4 mr-3 text-slate-400" />
+                                Edit User
+                              </button>
+                              <button
+                                onClick={() => { handleToggleActive(user); setOpenMenuId(null); }}
+                                className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                              >
+                                <Power className={`h-4 w-4 mr-3 ${user.isActive ? 'text-amber-500' : 'text-emerald-500'}`} />
+                                {user.isActive ? 'Deactivate' : 'Activate'}
+                              </button>
+                              <div className="border-t border-slate-100 my-1"></div>
+                              <button
+                                onClick={() => openDeleteModal(user)}
+                                className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4 mr-3" />
+                                Delete User
+                              </button>
+                            </>
+                          )}
+                          {readOnly && (
+                            <div className="px-4 py-3 text-xs text-slate-400 italic">No actions in system-wide mode</div>
+                          )}
                         </div>
                       )}
                     </div>

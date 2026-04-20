@@ -6,7 +6,7 @@ import OrganizationStructure from './OrganizationStructure';
 import AccessControl from './AccessControl';
 import MyProfile from './MyProfile';
 import { useSignalR } from './useSignalR';
-import { Users, Settings, UserPlus, LogOut, ShieldAlert, LayoutDashboard, ChevronRight, Building2, UserCheck, GitBranch, CalendarPlus, RefreshCw, User, MapPin, ArrowLeftRight } from 'lucide-react';
+import { Users, Settings, UserPlus, LogOut, ShieldAlert, LayoutDashboard, ChevronRight, Building2, UserCheck, GitBranch, CalendarPlus, RefreshCw, User, MapPin, ArrowLeftRight, AlertTriangle } from 'lucide-react';
 
 interface DashboardProps {
   user: any;
@@ -48,6 +48,9 @@ export default function Dashboard({ user, accessToken, setupRequired, onLogout, 
   };
 
   const visibleMenuItems = MENU_ITEMS.filter(item => canAccess(item.roles));
+
+  // System-wide mode: SuperAdmin chose "All Locations" — read-only for mutations
+  const isSystemWide = activeSegmentName === 'All Locations';
 
   const fetchMetrics = async () => {
     setMetricsLoading(true);
@@ -176,6 +179,24 @@ export default function Dashboard({ user, accessToken, setupRequired, onLogout, 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-8">
           <div className="mx-auto max-w-5xl">
+
+            {/* System-Wide Read-Only Banner */}
+            {isSystemWide && (
+              <div className="mb-6 flex items-center gap-3 px-5 py-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold">System-Wide View (Read-Only)</p>
+                  <p className="text-xs text-amber-600 mt-0.5">You are viewing data across all locations. To create, edit, or delete records, please switch to a specific login location.</p>
+                </div>
+                <button
+                  onClick={onSwitchLocation}
+                  className="shrink-0 px-3 py-1.5 text-xs font-bold bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                >
+                  Switch Location
+                </button>
+              </div>
+            )}
+
             {activeTab === 'Overview' && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex items-center justify-between mb-2">
@@ -246,15 +267,15 @@ export default function Dashboard({ user, accessToken, setupRequired, onLogout, 
             )}
 
             {activeTab === 'Employees' && canAccess(['SuperAdmin', 'Admin', 'HRManager', 'Manager']) && (
-              <EmployeeManagement accessToken={accessToken} />
+              <EmployeeManagement accessToken={accessToken} readOnly={isSystemWide} />
             )}
             
             {activeTab === 'User Management' && canAccess(['SuperAdmin']) && (
-              <UserManagement accessToken={accessToken} />
+              <UserManagement accessToken={accessToken} readOnly={isSystemWide} />
             )}
 
             {activeTab === 'Organization' && canAccess(['SuperAdmin', 'Admin', 'HRManager']) && (
-              <OrganizationStructure accessToken={accessToken} />
+              <OrganizationStructure accessToken={accessToken} readOnly={isSystemWide} />
             )}
 
             {activeTab === 'Roles & Permissions' && canAccess(['SuperAdmin']) && (

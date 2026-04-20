@@ -58,11 +58,12 @@ interface TeamDto {
 
 interface OrganizationStructureProps {
   accessToken: string;
+  readOnly?: boolean;
 }
 
 type OrgLevel = 'companies' | 'branches' | 'departments' | 'teams';
 
-export default function OrganizationStructure({ accessToken }: OrganizationStructureProps) {
+export default function OrganizationStructure({ accessToken, readOnly = false }: OrganizationStructureProps) {
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
   const [branches, setBranches] = useState<BranchDto[]>([]);
   const [departments, setDepartments] = useState<DepartmentDto[]>([]);
@@ -269,7 +270,7 @@ export default function OrganizationStructure({ accessToken }: OrganizationStruc
           <button onClick={fetchAll} className="flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">
             <RefreshCw className="h-4 w-4 mr-1.5" /> Refresh
           </button>
-          <button onClick={() => openCreateModal('companies')} className="flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95">
+          <button onClick={() => openCreateModal('companies')} disabled={readOnly} className="flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
             <Plus className="h-4 w-4 mr-2" /> Add Company
           </button>
         </div>
@@ -319,19 +320,25 @@ export default function OrganizationStructure({ accessToken }: OrganizationStruc
                       <p className="text-xs text-slate-500 mt-0.5">{companyBranches.length} branch{companyBranches.length !== 1 ? 'es' : ''} • {company.employeeCount} employee{company.employeeCount !== 1 ? 's' : ''}</p>
                     </div>
                     <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => toggleLoginLocation('company', company.id, company.isLoginLocation)} className={`p-1.5 rounded-lg transition-colors ${company.isLoginLocation ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'}`} title={company.isLoginLocation ? 'Remove as Login Location' : 'Set as Login Location'}>
-                        <MapPin className="h-3.5 w-3.5" />
-                      </button>
-                      <button onClick={() => openEditModal('companies', company)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
-                        <Edit className="h-3.5 w-3.5" />
-                      </button>
-                      <button onClick={() => setDeleteTarget({ type: 'companies', id: company.id, name: company.name })} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {!readOnly && (
+                        <>
+                          <button onClick={() => toggleLoginLocation('company', company.id, company.isLoginLocation)} className={`p-1.5 rounded-lg transition-colors ${company.isLoginLocation ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'}`} title={company.isLoginLocation ? 'Remove as Login Location' : 'Set as Login Location'}>
+                            <MapPin className="h-3.5 w-3.5" />
+                          </button>
+                          <button onClick={() => openEditModal('companies', company)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                            <Edit className="h-3.5 w-3.5" />
+                          </button>
+                          <button onClick={() => setDeleteTarget({ type: 'companies', id: company.id, name: company.name })} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </>
+                      )}
                     </div>
-                    <button onClick={() => openCreateModal('branches', company.id)} className="flex items-center text-xs font-semibold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors ml-2">
-                      <Plus className="h-3 w-3 mr-1" /> Branch
-                    </button>
+                    {!readOnly && (
+                      <button onClick={() => openCreateModal('branches', company.id)} className="flex items-center text-xs font-semibold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors ml-2">
+                        <Plus className="h-3 w-3 mr-1" /> Branch
+                      </button>
+                    )}
                   </div>
 
                   {/* Branches */}
@@ -361,19 +368,25 @@ export default function OrganizationStructure({ accessToken }: OrganizationStruc
                                   <p className="text-xs text-slate-400">{branchDepts.length} dept{branchDepts.length !== 1 ? 's' : ''} • {branch.employeeCount} emp</p>
                                 </div>
                                 <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button onClick={() => toggleLoginLocation('branch', branch.id, branch.isLoginLocation)} className={`p-1.5 rounded-lg transition-colors ${branch.isLoginLocation ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'}`} title={branch.isLoginLocation ? 'Remove as Login Location' : 'Set as Login Location'}>
-                                    <MapPin className="h-3 w-3" />
-                                  </button>
-                                  <button onClick={() => openEditModal('branches', branch)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
-                                    <Edit className="h-3 w-3" />
-                                  </button>
-                                  <button onClick={() => setDeleteTarget({ type: 'branches', id: branch.id, name: branch.name })} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                                    <Trash2 className="h-3 w-3" />
-                                  </button>
+                                  {!readOnly && (
+                                    <>
+                                      <button onClick={() => toggleLoginLocation('branch', branch.id, branch.isLoginLocation)} className={`p-1.5 rounded-lg transition-colors ${branch.isLoginLocation ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'}`} title={branch.isLoginLocation ? 'Remove as Login Location' : 'Set as Login Location'}>
+                                        <MapPin className="h-3 w-3" />
+                                      </button>
+                                      <button onClick={() => openEditModal('branches', branch)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                        <Edit className="h-3 w-3" />
+                                      </button>
+                                      <button onClick={() => setDeleteTarget({ type: 'branches', id: branch.id, name: branch.name })} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
-                                <button onClick={() => openCreateModal('departments', branch.id)} className="flex items-center text-xs font-semibold text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors ml-2">
-                                  <Plus className="h-3 w-3 mr-1" /> Dept
-                                </button>
+                                {!readOnly && (
+                                  <button onClick={() => openCreateModal('departments', branch.id)} className="flex items-center text-xs font-semibold text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors ml-2">
+                                    <Plus className="h-3 w-3 mr-1" /> Dept
+                                  </button>
+                                )}
                               </div>
 
                               {/* Departments */}
@@ -403,19 +416,25 @@ export default function OrganizationStructure({ accessToken }: OrganizationStruc
                                               <p className="text-xs text-slate-400">{deptTeams.length} team{deptTeams.length !== 1 ? 's' : ''} • {dept.employeeCount} emp</p>
                                             </div>
                                             <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                              <button onClick={() => toggleLoginLocation('department', dept.id, dept.isLoginLocation)} className={`p-1.5 rounded-lg transition-colors ${dept.isLoginLocation ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'}`} title={dept.isLoginLocation ? 'Remove as Login Location' : 'Set as Login Location'}>
-                                                <MapPin className="h-3 w-3" />
-                                              </button>
-                                              <button onClick={() => openEditModal('departments', dept)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
-                                                <Edit className="h-3 w-3" />
-                                              </button>
-                                              <button onClick={() => setDeleteTarget({ type: 'departments', id: dept.id, name: dept.name })} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                                                <Trash2 className="h-3 w-3" />
-                                              </button>
+                                              {!readOnly && (
+                                                <>
+                                                  <button onClick={() => toggleLoginLocation('department', dept.id, dept.isLoginLocation)} className={`p-1.5 rounded-lg transition-colors ${dept.isLoginLocation ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'}`} title={dept.isLoginLocation ? 'Remove as Login Location' : 'Set as Login Location'}>
+                                                    <MapPin className="h-3 w-3" />
+                                                  </button>
+                                                  <button onClick={() => openEditModal('departments', dept)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                                    <Edit className="h-3 w-3" />
+                                                  </button>
+                                                  <button onClick={() => setDeleteTarget({ type: 'departments', id: dept.id, name: dept.name })} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                                    <Trash2 className="h-3 w-3" />
+                                                  </button>
+                                                </>
+                                              )}
                                             </div>
-                                            <button onClick={() => openCreateModal('teams', dept.id)} className="flex items-center text-xs font-semibold text-purple-600 hover:bg-purple-50 px-3 py-1.5 rounded-lg transition-colors ml-2">
-                                              <Plus className="h-3 w-3 mr-1" /> Team
-                                            </button>
+                                            {!readOnly && (
+                                              <button onClick={() => openCreateModal('teams', dept.id)} className="flex items-center text-xs font-semibold text-purple-600 hover:bg-purple-50 px-3 py-1.5 rounded-lg transition-colors ml-2">
+                                                <Plus className="h-3 w-3 mr-1" /> Team
+                                              </button>
+                                            )}
                                           </div>
 
                                           {/* Teams */}
@@ -434,12 +453,16 @@ export default function OrganizationStructure({ accessToken }: OrganizationStruc
                                                       <p className="text-xs text-slate-400">{team.employeeCount} member{team.employeeCount !== 1 ? 's' : ''}</p>
                                                     </div>
                                                     <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                      <button onClick={() => openEditModal('teams', team)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
-                                                        <Edit className="h-3 w-3" />
-                                                      </button>
-                                                      <button onClick={() => setDeleteTarget({ type: 'teams', id: team.id, name: team.name })} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                                                        <Trash2 className="h-3 w-3" />
-                                                      </button>
+                                                      {!readOnly && (
+                                                        <>
+                                                          <button onClick={() => openEditModal('teams', team)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                                            <Edit className="h-3 w-3" />
+                                                          </button>
+                                                          <button onClick={() => setDeleteTarget({ type: 'teams', id: team.id, name: team.name })} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                                            <Trash2 className="h-3 w-3" />
+                                                          </button>
+                                                        </>
+                                                      )}
                                                     </div>
                                                   </div>
                                                 ))

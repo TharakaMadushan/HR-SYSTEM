@@ -53,6 +53,7 @@ interface OrgItem {
 
 interface EmployeeManagementProps {
   accessToken: string;
+  readOnly?: boolean;
 }
 
 const EMPLOYMENT_TYPES: Record<number, { label: string; color: string }> = {
@@ -73,7 +74,7 @@ const EMPLOYEE_STATUSES: Record<number, { label: string; color: string }> = {
 
 const PAGE_SIZE = 10;
 
-export default function EmployeeManagement({ accessToken }: EmployeeManagementProps) {
+export default function EmployeeManagement({ accessToken, readOnly = false }: EmployeeManagementProps) {
   const [employees, setEmployees] = useState<EmployeeListDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -390,20 +391,24 @@ export default function EmployeeManagement({ accessToken }: EmployeeManagementPr
             Back to Directory
           </button>
           <div className="flex space-x-3">
-            <button 
-              onClick={() => openEditModal(emp)}
-              className="flex items-center px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
-            >
-              <Edit className="h-4 w-4 mr-2 text-slate-400" />
-              Edit
-            </button>
-            <button 
-              onClick={() => openDeleteModal(emp)}
-              className="flex items-center px-4 py-2 rounded-lg border border-red-200 bg-white text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors shadow-sm"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </button>
+            {!readOnly && (
+              <button 
+                onClick={() => openEditModal(emp)}
+                className="flex items-center px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+              >
+                <Edit className="h-4 w-4 mr-2 text-slate-400" />
+                Edit
+              </button>
+            )}
+            {!readOnly && (
+              <button 
+                onClick={() => openDeleteModal(emp)}
+                className="flex items-center px-4 py-2 rounded-lg border border-red-200 bg-white text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors shadow-sm"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </button>
+            )}
           </div>
         </div>
 
@@ -645,7 +650,8 @@ export default function EmployeeManagement({ accessToken }: EmployeeManagementPr
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="shrink-0 flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg transition-all active:scale-95"
+            disabled={readOnly}
+            className="shrink-0 flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Onboard Employee
@@ -727,21 +733,25 @@ export default function EmployeeManagement({ accessToken }: EmployeeManagementPr
                             <ArrowRight className="h-4 w-4 mr-3 text-slate-400" />
                             View Details
                           </button>
-                          <button
-                            onClick={() => openEditModal(emp)}
-                            className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                          >
-                            <Edit className="h-4 w-4 mr-3 text-slate-400" />
-                            Edit Employee
-                          </button>
-                          <div className="border-t border-slate-100 my-1"></div>
-                          <button
-                            onClick={() => openDeleteModal(emp)}
-                            className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            <Trash2 className="h-4 w-4 mr-3" />
-                            Delete Employee
-                          </button>
+                          {!readOnly && (
+                            <>
+                              <button
+                                onClick={() => openEditModal(emp)}
+                                className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                              >
+                                <Edit className="h-4 w-4 mr-3 text-slate-400" />
+                                Edit Employee
+                              </button>
+                              <div className="border-t border-slate-100 my-1"></div>
+                              <button
+                                onClick={() => openDeleteModal(emp)}
+                                className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4 mr-3" />
+                                Delete Employee
+                              </button>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
